@@ -17,7 +17,6 @@ import ru.glowgrew.avtorealmonitor.http.CookieHandlingClientHttpRequestIntercept
 import ru.glowgrew.avtorealmonitor.telegram.TelegramService;
 
 import java.net.URI;
-import java.time.*;
 import java.util.HashSet;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -27,11 +26,8 @@ import static org.springframework.http.HttpHeaders.COOKIE;
 @Service
 public class AvtorealService {
 
-    public static final int WINDOW_DURATION_MINUTES = 20;
-    public static final DayOfWeek TARGET_DAY = DayOfWeek.TUESDAY;
-    public static final LocalTime TARGET_TIME = LocalTime.of(17, 0);
-    public static final ZoneId TIME_ZONE = ZoneId.of("UTC+5");
     public static final String BASE_URL = "https://avtoreal-record.ru";
+    public static final String TIME_ZONE = "GMT+5";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AvtorealService.class);
 
@@ -57,18 +53,11 @@ public class AvtorealService {
         this.appProperties = appProperties;
     }
 
-    @Scheduled(fixedDelay = 2 * 60 * 1000)
-    public void defaultScanner() {
-        scanFreeEntries();
-    }
-
-    @Scheduled(fixedDelay = 1000)
-    public void rushHourScanner() {
-        if (isWithinTimeRange()) {
-            scanFreeEntries();
-        }
-    }
-
+    // Will run every second in 10 minutes window of 17:00 GMT+5 Tuesday (i.e. between 16:50–17:10)
+    // and every 2 minutes forever
+    @Scheduled(cron = "*/1 50-59 16 * * 2", zone = TIME_ZONE)
+    @Scheduled(cron = "*/1 0-10 17 * * 2", zone = TIME_ZONE)
+    @Scheduled(cron = "0 */2 * * * *")
     public void scanFreeEntries() {
         authenticate();
 
@@ -104,16 +93,6 @@ public class AvtorealService {
         }
     }
 
-    private boolean isWithinTimeRange() {
-        var now = ZonedDateTime.now(TIME_ZONE);
-        if (now.getDayOfWeek() != TARGET_DAY) {
-            return false;
-        }
-        var currentTime = now.toLocalTime();
-        return !currentTime.isBefore(TARGET_TIME.minusMinutes(WINDOW_DURATION_MINUTES))
-               && !currentTime.isAfter(TARGET_TIME.plusMinutes(WINDOW_DURATION_MINUTES));
-    }
-
     private Set<FreeScheduleEntry> getCurrentEntries() {
         var response = avtorealClient.get()
             .uri(this::getCurrentScheduleUri)
@@ -139,7 +118,7 @@ public class AvtorealService {
         int scheduleId = -1;
 
         for (var scheduleLink : scheduleLinks) {
-            if (!scheduleLink.text().equalsIgnoreCase(appProperties.instructorName())) {
+            if (!appProperties.drivingInstructor().equalsIgnoreCase(scheduleLink.text())) {
                 continue;
             }
             var href = scheduleLink.attr("href");
@@ -154,7 +133,7 @@ public class AvtorealService {
             scheduleId = currentId.getAsInt();
         }
 
-        if (currentScheduleId != scheduleId) {
+        if (scheduleId != -1 && currentScheduleId != scheduleId) {
             currentScheduleId = scheduleId;
             var currentScheduleUri = getCurrentScheduleUri();
             var newScheduleText = "🚀 Выложено новое расписание!\n\n%s".formatted(currentScheduleUri);

@@ -7,16 +7,14 @@ spring:
   threads:
     virtual:
       enabled: true
+server:
+  port: 0
 
 app:
   api-endpoint: https://api.telegram.org
-  #  Provide your secret data here or in the application-secret.yml file
+  # Provide your secrets here or in the application-secret.yml file
   #  bot-token: 1234567890:AABBCCDDaabbccdd
-  #  webhook-public-endpoint: https://example.org/webhook
-  #  webhook-secret-token: SecretToken1234
+  #  telegram-chat-id: 111111111
   #  avtoreal-login: login
   #  avtoreal-password: password
-  #  telegram-chat-id: 111111111
-  #  instructor-name: INSTRUCTOR FULL NAME
-server:
-  port: 8089
+  #  driving-instructor: INSTRUCTOR FULL NAME

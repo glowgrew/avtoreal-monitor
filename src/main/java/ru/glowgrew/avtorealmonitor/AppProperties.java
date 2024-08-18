@@ -6,12 +6,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record AppProperties(
     String botToken,
     String apiEndpoint,
-    String webhookSecretToken,
-    String webhookPublicEndpoint,
     String telegramChatId,
     String avtorealLogin,
     String avtorealPassword,
-    String instructorName
+    String drivingInstructor
 ) {
 
 }

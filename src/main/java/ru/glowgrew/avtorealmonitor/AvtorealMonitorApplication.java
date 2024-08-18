@@ -5,9 +5,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-
 @EnableScheduling
 @ConfigurationPropertiesScan
 @SpringBootApplication
