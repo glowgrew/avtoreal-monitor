@@ -55,8 +55,8 @@ public class AvtorealService {
 
     // Will run every second in 10 minutes window of 17:00 GMT+5 Tuesday (i.e. between 16:50–17:10)
     // and every 2 minutes forever
-    @Scheduled(cron = "*/1 50-59 16 * * 2", zone = TIME_ZONE)
-    @Scheduled(cron = "*/1 0-10 17 * * 2", zone = TIME_ZONE)
+    @Scheduled(cron = "* 50-59 16 * * 2", zone = TIME_ZONE)
+    @Scheduled(cron = "* 0-10 17 * * 2", zone = TIME_ZONE)
     @Scheduled(cron = "0 */2 * * * *")
     public void scanFreeEntries() {
         authenticate();
